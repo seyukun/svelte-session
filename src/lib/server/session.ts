@@ -44,11 +44,16 @@ export default class Session {
 	}
 
 	public async destroy(): Promise<void> {
+		if (this.id === undefined) {
+			this.id = this.cookies.get('sessid');
+		}
+
 		if (this.id !== undefined) {
 			await keyv.delete(this.id);
 			this.id = undefined;
 			this.value = {};
 			this.cookies.delete('sessid', { path: '/' });
+			return;
 		}
 	}
 
