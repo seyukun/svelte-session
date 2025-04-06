@@ -1,38 +1,53 @@
-# sv
+# Svelte Session Login
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
+このリポジトリは、SvelteKit を用いてセッションを使ったログイン機能を実装したプロジェクトです。ユーザー登録、ログイン、セッション管理（作成、更新、破棄）を含む基本的な認証フローがデモされています。
 
-## Creating a project
+## 使っているスタック
 
-If you're seeing this, you've probably already done this step. Congrats!
+- **フロントエンド**: [SvelteKit](https://kit.svelte.dev/) (Svelte 5)
+- **データベース**: [SQLite](https://www.sqlite.org/index.html) と [Prisma](https://www.prisma.io/)
+- **認証セッション**: 独自のセッション管理（[Keyv](https://github.com/lukechilds/keyv) を利用）
+- **言語**: TypeScript
 
-```bash
-# create a new project in the current directory
-npx sv create
+## session.ts の使い方
 
-# create a new project in my-app
-npx sv create my-app
+`src/lib/server/session.ts` に実装している Session クラスは、以下のようにセッションの開始、更新、破棄が可能です。
+
+```ts
+import Session from '$lib/server/session';
+
+// セッションの開始（セッションIDがクッキーに存在する場合はそれを利用、存在しない場合は新規作成）
+const session = new Session(cookies);
+const sessval = await session.start();
+
+// ユーザー情報をセッションに保存（ログイン時などに使用）
+sessval['userid'] = user.id.toString();
+
+// セッションIDの再生成（セキュリティ向上のためログイン後などに推奨）
+await session.regenerate();
+
+// セッションの破棄（ログアウト時などに使用）
+await session.destroy();
 ```
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
+依存パッケージのインストール後、以下のコマンドで開発用サーバーを起動できます。
 
 ```bash
+npm install
 npm run dev
-
-# or start the server and open the app in a new browser tab
+# またはブラウザで自動的に開く場合:
 npm run dev -- --open
 ```
 
 ## Building
 
-To create a production version of your app:
+本番環境向けビルドの作成は以下のコマンドで行います：
 
 ```bash
 npm run build
+npm run preview
 ```
 
-You can preview the production build with `npm run preview`.
-
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+> ※ デプロイ先によっては、適宜 [SvelteKit Adapter](https://kit.svelte.dev/docs/adapters) の導入が必要となります。
